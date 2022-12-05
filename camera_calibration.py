@@ -49,9 +49,6 @@ for image in images:
 
 cv.destroyAllWindows()
 
-
-
-
 # Calibration
 
 print(objpoints, imgpoints)
@@ -59,32 +56,28 @@ print(objpoints, imgpoints)
 ret, cameraMatrix, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, frameSize, None, None)
 
 
-#Undistortion
+print("calibrated")
 
-img = cv.imread('images\calibration\calibration1.jpg')
-h,  w = img.shape[:2]
-newCameraMatrix, roi = cv.getOptimalNewCameraMatrix(cameraMatrix, dist, (w,h), 1, (w,h))
+print("writing data to calibration_data/MultiMatrix.npz")
+np.savez(
+    "calibration_data/MultiMatrix",
+    camMatrix=cameraMatrix,
+    distCoef=dist,
+    rVector=rvecs,
+    tVector=tvecs,
+)
 
+print("-------------------------------------------")
 
+print("loading data stored using numpy savez function\n \n \n")
 
-# Undistort
-dst = cv.undistort(img, cameraMatrix, dist, None, newCameraMatrix)
+data = np.load("calibration_data/MultiMatrix.npz")
 
-# crop the image
-x, y, w, h = roi
-dst = dst[y:y+h, x:x+w]
-cv.imwrite('images\calibration\calibrationResult.jpg', dst)
+camMatrix = data["camMatrix"]
+distCof = data["distCoef"]
+rVector = data["rVector"]
+tVector = data["tVector"]
 
+print(camMatrix)
 
-
-
-
-# Reprojection Error
-mean_error = 0
-
-for i in range(len(objpoints)):
-    imgpoints2, _ = cv.projectPoints(objpoints[i], rvecs[i], tvecs[i], cameraMatrix, dist)
-    error = cv.norm(imgpoints[i], imgpoints2, cv.NORM_L2)/len(imgpoints2)
-    mean_error += error
-
-print( "total error: {}".format(mean_error/len(objpoints)) )
+print("loaded calibration data successfully")
