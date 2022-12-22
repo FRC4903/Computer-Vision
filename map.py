@@ -1,3 +1,4 @@
+#experimental additional functionality to aid drivers with target finding and selection
 from pupil_apriltags import Detector
 import cv2
 import json
@@ -31,7 +32,7 @@ while True:
         for detect in detections:
             if detect.hamming == 0:
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                smile = Image.open("images/target.png")
+                smile = Image.open("images/target.jpg")
                 back = Image.fromarray(img)
                 corners = np.array(detect.corners)
                 bottom_right = corners.max(axis=0)
