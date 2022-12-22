@@ -68,14 +68,13 @@ print(camera_params)
 while True:
     result, img = cam.read()
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
+    img = plotPoint(img, [img.shape[1]/2,img.shape[0]/2], CENTER_COLOR)
     detections = detector.detect(gray, estimate_tag_pose=True, tag_size=0.1524, camera_params=camera_params)
     if not detections:
         print("Nothing")
     else:
         for detect in detections:
             if detect.hamming == 0:
-                img = plotPoint(img, [img.shape[0]/2,img.shape[1]/2], CENTER_COLOR)
                 rot_matrix = Rotation.from_matrix(detect.pose_R)
                 euler = rot_matrix.as_euler('zxy', degrees=True)
                 img = plotPoint(img, detect.center, CENTER_COLOR)
