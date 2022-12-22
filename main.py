@@ -75,6 +75,7 @@ while True:
     else:
         for detect in detections:
             if detect.hamming == 0:
+                img = plotPoint(img, [img.shape[0],img.shape[1]], CENTER_COLOR)
                 rot_matrix = Rotation.from_matrix(detect.pose_R)
                 euler = rot_matrix.as_euler('zxy', degrees=True)
                 img = plotPoint(img, detect.center, CENTER_COLOR)
