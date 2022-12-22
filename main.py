@@ -75,7 +75,7 @@ while True:
     else:
         for detect in detections:
             if detect.hamming == 0:
-                img = plotPoint(img, [img.shape[0],img.shape[1]], CENTER_COLOR)
+                img = plotPoint(img, [img.shape[0]/2,img.shape[1]/2], CENTER_COLOR)
                 rot_matrix = Rotation.from_matrix(detect.pose_R)
                 euler = rot_matrix.as_euler('zxy', degrees=True)
                 img = plotPoint(img, detect.center, CENTER_COLOR)
@@ -88,8 +88,8 @@ while True:
                 side_lengths.sort(reverse=True)
                 distance = (known_width*focal_length)/side_lengths[0]
                 distance += math.cos((euler[1]*math.pi*2/360)*known_width/2) + math.cos((euler[2]*math.pi*2/360)*known_width/2)
-                vert_px = detect.center[1] - img.shape[1]
-                lat_px = detect.center[0] - img.shape[0]
+                vert_px = detect.center[1] - img.shape[1]/2
+                lat_px = detect.center[0] - img.shape[0]/2
                 vert_inches = (known_width/ref_image_width)*(known_distance/distance)*vert_px
                 lat_inches = (known_width/ref_image_width)*(known_distance/distance)*lat_px
                 vert_offset = math.asin(vert_inches/distance)/math.pi/2*360
