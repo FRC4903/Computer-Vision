@@ -98,6 +98,5 @@ while True:
                 print("[TAG_ORIENTATION: " + str(euler) + ", \nDISTANCE: " + str(distance) + ", \nCAMERA_ANGLE: "+ str(camera_angle) +"]\n")
 
     cv2.imshow('Result', img)
-    cv2.resizeWindow('Result', 640,360)
     if cv2.waitKey(1) == 13:
         break
