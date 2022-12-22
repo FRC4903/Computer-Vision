@@ -89,8 +89,8 @@ while True:
                 distance += math.cos((euler[1]*math.pi*2/360)*known_width/2) + math.cos((euler[2]*math.pi*2/360)*known_width/2)
                 vert_px = detect.center[1] - img.shape[1]/2
                 lat_px = detect.center[0] - img.shape[0]/2
-                vert_inches = (known_width/ref_image_width)*(known_distance/distance)*vert_px
-                lat_inches = (known_width/ref_image_width)*(known_distance/distance)*lat_px
+                vert_inches = (known_width/ref_image_width)/(known_distance/distance)*vert_px
+                lat_inches = (known_width/ref_image_width)/(known_distance/distance)*lat_px
                 vert_offset = math.asin(vert_inches/distance)/math.pi/2*360
                 lat_offset = math.asin(lat_inches/distance)/math.pi/2*360
                 camera_angle = [lat_offset,vert_offset]
