@@ -91,8 +91,8 @@ while True:
                 lat_px = detect.center[0] - img.shape[0]
                 vert_inches = (ref_image_width*known_distance)/vert_px
                 lat_inches = (ref_image_width*known_distance)/lat_px
-                vert_offset = math.arcsin(vert_inches/distance)/math.pi/2*360
-                lat_offset = math.arcsin(lat_inches/distance)/math.pi/2*360
+                vert_offset = math.asin(vert_inches/distance)/math.pi/2*360
+                lat_offset = math.asin(lat_inches/distance)/math.pi/2*360
                 camera_angle = [lat_offset,vert_offset]
                 print("[TAG_ORIENTATION: " + str(euler) + ", \nDISTANCE: " + str(distance) + ", \nCAMERA_ANGLE: "+ str(camera_angle) +"]\n")
 
