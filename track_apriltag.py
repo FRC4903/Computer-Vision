@@ -1,7 +1,24 @@
 import cv2
-from apriltags import Detector
+from cscore import CameraServer
+from apriltag import Detector
 import numpy as np
 from time import time
+from networktables import NetworkTablesInstance
+
+ntinst = NetworkTablesInstance.getDefault()
+ntinst.startClientTeam(4903)
+ntinst.startDSClient()
+nt = ntinst.getTable('SmartDashboard');
+
+cs = CameraServer()
+CameraServer.enableLogging()
+
+cs.startAutomaticCapture().setResolution(width, height)
+
+sink = cs.getVideo()
+
+output = cs.putVideo("April Tags", width, height)
+
 
 # Edit these variables for config.
 camera_params = 'camera calibration/CameraCalibration.npz'
@@ -34,8 +51,7 @@ frame_height = capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
 frame_width = capture.get(cv2.CAP_PROP_FRAME_WIDTH)
 
 fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-writer = cv2.VideoWriter(output_file, apiPreference=0, fourcc=fourcc, fps=framerate,
-                         frameSize=(int(frame_width), int(frame_height)))
+writer = cv2.VideoWriter(output_file, apiPreference=0, fourcc=fourcc, fps=framerate, frameSize=(int(frame_width), int(frame_height)))
 
 
 # options = DetectorOptions(families="tag36h11")
@@ -124,6 +140,9 @@ while capture.isOpened():
 
                 cv2.circle(inputImage, (int((frame_width / 2)), int((frame_height / 2))), 5, (0, 0, 255), 2)
 
+                nt.putNumber("x", x_centered);
+                nt.putNumber("y", y_centered);
+
                 # pose = detector.detection_pose(detection=r, camera_params=aprilCameraMatrix, tag_size=8)
                 poseRotation = r.pose_R
                 poseTranslation = r.pose_t
@@ -159,6 +178,7 @@ while capture.isOpened():
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 break
 
+        output.putFrame(inputImage)
 
     # Break the loop
     else:
