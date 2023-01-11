@@ -1,5 +1,5 @@
 import cv2
-from apriltags import Detector
+from apriltag import Detector
 import numpy as np
 from time import time
 
