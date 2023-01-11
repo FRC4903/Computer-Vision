@@ -1,7 +1,6 @@
 import cv2
 from apriltags import Detector
 import numpy as np
-import matplotlib.pyplot as plt
 from time import time
 
 # Edit these variables for config.
@@ -38,13 +37,6 @@ fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 writer = cv2.VideoWriter(output_file, apiPreference=0, fourcc=fourcc, fps=framerate,
                          frameSize=(int(frame_width), int(frame_height)))
 
-if show_graph:
-    fig = plt.figure()
-    axes = plt.axes(projection='3d')
-    axes.set_title("3D scatterplot", pad=110, size=100)
-    axes.set_xlabel("X")
-    axes.set_ylabel("Y")
-    axes.set_zlabel("Z")
 
 # options = DetectorOptions(families="tag36h11")
 detector = Detector(
@@ -149,12 +141,6 @@ while capture.isOpened():
                 # z axis
                 cv2.line(inputImage, (cX, cY), (cX + int(poseRotation[0][2] * 100), cY + int(poseRotation[1][2] * 100)), (255, 0, 0), 2)
 
-                if show_graph:
-                    # only if the id of the tag is 8, plot the 3D graph
-                    if r.tag_id == 0:
-                        axes.scatter(poseTranslation[0][0], poseTranslation[1][0], poseTranslation[2][0])
-                        plt.pause(0.01)
-
         if debug_mode:
             # show the output image after AprilTag detection
             print("[INFO] displaying image after overlay")
@@ -183,5 +169,3 @@ while capture.isOpened():
 # save the output video to disk
 writer.release()
 capture.release()
-if show_graph:
-    plt.show()
