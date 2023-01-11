@@ -6,7 +6,7 @@ from time import time
 
 # Edit these variables for config.
 camera_params = 'camera calibration/CameraCalibration.npz'
-webcam = True
+webcam = False
 
 video_source = 'Testing_apriltag.mp4'
 framerate = 30
