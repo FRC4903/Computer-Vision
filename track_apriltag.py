@@ -1,24 +1,7 @@
 import cv2
-from cscore import CameraServer
 from apriltag import Detector
 import numpy as np
 from time import time
-from networktables import NetworkTablesInstance
-
-ntinst = NetworkTablesInstance.getDefault()
-ntinst.startClientTeam(4903)
-ntinst.startDSClient()
-nt = ntinst.getTable('SmartDashboard');
-
-cs = CameraServer()
-CameraServer.enableLogging()
-
-cs.startAutomaticCapture().setResolution(width, height)
-
-sink = cs.getVideo()
-
-output = cs.putVideo("April Tags", width, height)
-
 
 from cscore import CameraServer
 from networktables import NetworkTablesInstance
@@ -195,8 +178,6 @@ while capture.isOpened():
         if cv2.waitKey(25) & 0xFF == ord('q'):
             break
         #320, 240
-        output.putFrame(inputImage);
-
         output.putFrame(inputImage)
 
     # Break the loop
