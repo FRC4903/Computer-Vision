@@ -1,8 +1,5 @@
 import cv2
-<<<<<<< Updated upstream
 from cscore import CameraServer
-=======
->>>>>>> Stashed changes
 from apriltag import Detector
 import numpy as np
 from time import time
@@ -192,16 +189,13 @@ while capture.isOpened():
         writer.write(inputImage)
 
         # Press Q on keyboard to  exit
-<<<<<<< Updated upstream
         if not show_graph:
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 break
-=======
         if cv2.waitKey(25) & 0xFF == ord('q'):
             break
         #320, 240
         output.putFrame(inputImage);
->>>>>>> Stashed changes
 
         output.putFrame(inputImage)
 
