@@ -20,8 +20,8 @@ aprilCameraMatrix = [cameraMatrix[0][0], cameraMatrix[1][1], cameraMatrix[0][2],
 
 capture = cv2.VideoCapture(0)
 
-frame_height = capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
-frame_width = capture.get(cv2.CAP_PROP_FRAME_WIDTH)
+frame_height = 240
+frame_width = 320
 
 # options = DetectorOptions(families="tag36h11")
 detector = Detector(
@@ -58,7 +58,7 @@ while capture.isOpened():
         results = detector.detect(image, estimate_tag_pose=True, camera_params=aprilCameraMatrix, tag_size=0.2032)
 
         # print(results)
-        if debug_mode:
+        if debug_mode:  
             print(f"[INFO] {len(results)} total AprilTags detected")
             print(f"[INFO] Looping over {len(results)} apriltags and getting data")
 
@@ -109,6 +109,7 @@ while capture.isOpened():
 
                 poseRotation = r.pose_R
                 poseTranslation = r.pose_t
+                poseTranslation = [i*31.9541559133 for i in poseTranslation]
 
                 if debug_mode:
                     print(f"[DATA] Detection rotation matrix:\n{poseRotation}")
