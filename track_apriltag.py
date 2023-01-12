@@ -1,5 +1,8 @@
 import cv2
+<<<<<<< Updated upstream
 from cscore import CameraServer
+=======
+>>>>>>> Stashed changes
 from apriltag import Detector
 import numpy as np
 from time import time
@@ -19,6 +22,18 @@ sink = cs.getVideo()
 
 output = cs.putVideo("April Tags", width, height)
 
+
+from cscore import CameraServer
+from networktables import NetworkTablesInstance
+
+ntinst = NetworkTablesInstance.getDefault()
+ntinst.startClientTeam(4903)
+ntinst.startDSClient()
+nt = ntinst.getTable('SmartDashboard')
+
+cs = CameraServer()
+CameraServer.enableLogging()
+output = cs.putVideo("April Tags", 320, 240)
 
 # Edit these variables for config.
 camera_params = 'camera calibration/CameraCalibration.npz'
@@ -129,6 +144,9 @@ while capture.isOpened():
                 x_centered = cX - frame_width / 2
                 y_centered = -1 * (cY - frame_height / 2)
 
+                nt.putNumber("x", x_centered);
+                nt.putNumber("y", y_centered);
+
                 cv2.putText(inputImage, f"Center X coord: {x_centered}", (ptB[0] + 10, ptB[1] - 20),
                             cv2.FONT_HERSHEY_SIMPLEX, .5, (0, 255, 0), 2)
 
@@ -174,9 +192,16 @@ while capture.isOpened():
         writer.write(inputImage)
 
         # Press Q on keyboard to  exit
+<<<<<<< Updated upstream
         if not show_graph:
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 break
+=======
+        if cv2.waitKey(25) & 0xFF == ord('q'):
+            break
+        #320, 240
+        output.putFrame(inputImage);
+>>>>>>> Stashed changes
 
         output.putFrame(inputImage)
 
