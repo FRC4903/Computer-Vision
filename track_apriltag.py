@@ -11,22 +11,23 @@ ntinst.startClientTeam(4903)
 ntinst.startDSClient()
 nt = ntinst.getTable('SmartDashboard')
 
+frame_height = 240
+frame_width = 320
+
 cs = CameraServer()
 CameraServer.enableLogging()
-output = cs.putVideo("April Tags", 320, 240)
+output = cs.putVideo("April Tags", frame_width, frame_height)
+
+cs.startAutomaticCapture().setResolution(frame_width, frame_height)
+
+sink = cs.getVideo()
 
 # Edit these variables for config.
 camera_params = 'camera calibration/CameraCalibration.npz'
-webcam = False
 
-video_source = 'Testing_apriltag.mp4'
 framerate = 30
-
 output_overlay = True
-output_file = 'vision output/test_output.mp4'
 undistort_frame = True
-
-show_graph = False
 debug_mode = True
 show_framerate = True
 
@@ -36,18 +37,8 @@ with np.load(camera_params) as file:
 
 aprilCameraMatrix = [cameraMatrix[0][0], cameraMatrix[1][1], cameraMatrix[0][2], cameraMatrix[1][2]]
 
-if webcam:
-    capture = cv2.VideoCapture(0)
-else:
-    capture = cv2.VideoCapture(video_source)
 
-# video_fps = capture.get(cv2.CAP_PROP_FPS),
-frame_height = capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
-frame_width = capture.get(cv2.CAP_PROP_FRAME_WIDTH)
-
-fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-writer = cv2.VideoWriter(output_file, apiPreference=0, fourcc=fourcc, fps=framerate, frameSize=(int(frame_width), int(frame_height)))
-
+#capture = cv2.VideoCapture(1)
 
 # options = DetectorOptions(families="tag36h11")
 detector = Detector(
@@ -56,17 +47,17 @@ detector = Detector(
     quad_decimate=2.0,
     quad_sigma=3.0,
     decode_sharpening=1.0,
-    refine_edges=3,
+    refine_edges=3
 )
-
+"""
 # Check if camera opened successfully
 if not capture.isOpened():
     print("Error opening video stream or file")
-
+"""
 # Read until video is completed
-while capture.isOpened():
+while true:
     # Capture frame-by-frame
-    ret, frame = capture.read()
+    ret, frame = sink.grabFrame(None)
     if ret:
         start_time = time()
 
@@ -81,18 +72,16 @@ while capture.isOpened():
 
         if debug_mode:
             print("[INFO] detecting AprilTags...")
-        results = detector.detect(image, estimate_tag_pose=True, camera_params=aprilCameraMatrix, tag_size=5.25)
+        results = detector.detect(image, estimate_tag_pose=True, camera_params=aprilCameraMatrix, tag_size=0.2032)
 
         # print(results)
-        if debug_mode:
+        if debug_mode:  
             print(f"[INFO] {len(results)} total AprilTags detected")
             print(f"[INFO] Looping over {len(results)} apriltags and getting data")
 
         # loop over the AprilTag detection results
         if len(results) == 0:
-            if not show_graph:
-                cv2.imshow("Image", inputImage)
-                writer.write(inputImage)
+            cv2.imshow("Image", inputImage)
 
         for r in results:
             # extract the bounding box (x, y)-coordinates for the AprilTag
@@ -124,9 +113,6 @@ while capture.isOpened():
                 x_centered = cX - frame_width / 2
                 y_centered = -1 * (cY - frame_height / 2)
 
-                nt.putNumber("x", x_centered);
-                nt.putNumber("y", y_centered);
-
                 cv2.putText(inputImage, f"Center X coord: {x_centered}", (ptB[0] + 10, ptB[1] - 20),
                             cv2.FONT_HERSHEY_SIMPLEX, .5, (0, 255, 0), 2)
 
@@ -138,12 +124,9 @@ while capture.isOpened():
 
                 cv2.circle(inputImage, (int((frame_width / 2)), int((frame_height / 2))), 5, (0, 0, 255), 2)
 
-                nt.putNumber("x", x_centered);
-                nt.putNumber("y", y_centered);
-
-                # pose = detector.detection_pose(detection=r, camera_params=aprilCameraMatrix, tag_size=8)
                 poseRotation = r.pose_R
                 poseTranslation = r.pose_t
+                poseTranslation = [i*31.9541559133 for i in poseTranslation]
 
                 if debug_mode:
                     print(f"[DATA] Detection rotation matrix:\n{poseRotation}")
@@ -167,18 +150,11 @@ while capture.isOpened():
             cv2.putText(inputImage, f"FPS: {1 / (end_time - start_time)}", (0, 30),
                         cv2.FONT_HERSHEY_SIMPLEX, .5, (0, 255, 0), 2)
 
-        if not show_graph:
-            cv2.imshow("Image", inputImage)
-        writer.write(inputImage)
-
+        cv2.imshow("Image", inputImage)
         # Press Q on keyboard to  exit
-        if not show_graph:
-            if cv2.waitKey(25) & 0xFF == ord('q'):
-                break
         if cv2.waitKey(25) & 0xFF == ord('q'):
             break
-        #320, 240
-        output.putFrame(inputImage)
+
 
     # Break the loop
     else:
@@ -187,5 +163,4 @@ while capture.isOpened():
 
 # When everything done, release the video capture object
 # save the output video to disk
-writer.release()
 capture.release()
