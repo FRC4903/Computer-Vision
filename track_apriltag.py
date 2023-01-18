@@ -1,5 +1,5 @@
 import cv2
-from apriltag import Detector
+from pupil_apriltags import Detector
 import numpy as np
 from time import time
 
@@ -37,9 +37,6 @@ with np.load(camera_params) as file:
 
 aprilCameraMatrix = [cameraMatrix[0][0], cameraMatrix[1][1], cameraMatrix[0][2], cameraMatrix[1][2]]
 
-
-#capture = cv2.VideoCapture(1)
-
 # options = DetectorOptions(families="tag36h11")
 detector = Detector(
     families='tag16h5',
@@ -47,17 +44,13 @@ detector = Detector(
     quad_decimate=2.0,
     quad_sigma=3.0,
     decode_sharpening=1.0,
-    refine_edges=3
+    refine_edges=3,
 )
-"""
-# Check if camera opened successfully
-if not capture.isOpened():
-    print("Error opening video stream or file")
-"""
+
 # Read until video is completed
-while true:
+while True:
     # Capture frame-by-frame
-    ret, frame = sink.grabFrame(None)
+    ret, frame = sink.grabFrame(None);
     if ret:
         start_time = time()
 
@@ -112,6 +105,9 @@ while true:
 
                 x_centered = cX - frame_width / 2
                 y_centered = -1 * (cY - frame_height / 2)
+                
+                nt.putNumber("x", x_centered);
+                nt.putNumber("y", y_centered);
 
                 cv2.putText(inputImage, f"Center X coord: {x_centered}", (ptB[0] + 10, ptB[1] - 20),
                             cv2.FONT_HERSHEY_SIMPLEX, .5, (0, 255, 0), 2)
@@ -154,13 +150,11 @@ while true:
         # Press Q on keyboard to  exit
         if cv2.waitKey(25) & 0xFF == ord('q'):
             break
+        #320, 240
+        output.putFrame(inputImage)
+
 
 
     # Break the loop
     else:
         break
-
-
-# When everything done, release the video capture object
-# save the output video to disk
-capture.release()
