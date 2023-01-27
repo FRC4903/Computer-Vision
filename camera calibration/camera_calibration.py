@@ -2,6 +2,19 @@ import numpy as np
 import cv2 as cv
 import glob
 
+from cscore import CameraServer
+from networktables import NetworkTablesInstance
+
+ntinst = NetworkTablesInstance.getDefault()
+ntinst.initialize(server='10.49.3.2')
+ntinst.startClientTeam(4903)
+ntinst.startDSClient()
+nt = ntinst.getTable('SmartDashboard')
+
+cs = CameraServer
+CameraServer.enableLogging()
+output = cs.putVideo("April Tags", 640, 480)
+
 export_file = 'CameraCalibration'
 grid_width = 14
 grid_height = 9
@@ -34,7 +47,4 @@ for fname in images:
         ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
         np.savez(f'{export_file}', cameraMatrix=mtx, dist=dist, rvecs=rvecs, tvecs=tvecs)
 
-        cv.imshow('img', img)
-        cv.waitKey(500)
-
-cv.destroyAllWindows()
+        output.putFrame(img)

@@ -1,7 +1,28 @@
+import numpy as np
 import cv2
 from pupil_apriltags import Detector
-import numpy as np
 from time import time
+
+from cscore import CameraServer, VideoMode
+from networktables import NetworkTablesInstance
+
+ntinst = NetworkTablesInstance.getDefault()
+ntinst.initialize(server='10.49.3.2')
+ntinst.startClientTeam(4903)
+ntinst.startDSClient()
+nt = ntinst.getTable('SmartDashboard')
+
+frame_height = 480
+frame_width = 640
+
+cs = CameraServer
+camera = cs.startAutomaticCapture("apriltag camera", "/dev/video0")
+camera.setResolution(frame_width, frame_height)
+CameraServer.enableLogging()
+#cs.setVideoMode(VideoMode.PixelFormat.kBGR, frame_width, frame_height, 15)
+
+sink = cs.getVideo()
+output = cs.putVideo("April Tags", frame_width, frame_height)
 
 # Edit these variables for config.
 camera_params = 'camera calibration/CameraCalibration.npz'
@@ -18,11 +39,6 @@ with np.load(camera_params) as file:
 
 aprilCameraMatrix = [cameraMatrix[0][0], cameraMatrix[1][1], cameraMatrix[0][2], cameraMatrix[1][2]]
 
-capture = cv2.VideoCapture(0)
-
-frame_height = 240
-frame_width = 320
-
 # options = DetectorOptions(families="tag36h11")
 detector = Detector(
     families='tag16h5',
@@ -33,15 +49,11 @@ detector = Detector(
     refine_edges=3,
 )
 
-# Check if camera opened successfully
-if not capture.isOpened():
-    print("Error opening video stream or file")
-
 # Read until video is completed
-while capture.isOpened():
+while True:
     # Capture frame-by-frame
-    ret, frame = capture.read()
-    if ret:
+    ret, frame = sink.grabFrameNoTimeout(np.zeros(shape=(frame_height, frame_width, 3), dtype=np.uint8))
+    if ret != 0:
         start_time = time()
 
         inputImage = frame
@@ -58,14 +70,14 @@ while capture.isOpened():
         results = detector.detect(image, estimate_tag_pose=True, camera_params=aprilCameraMatrix, tag_size=0.2032)
 
         # print(results)
-        if debug_mode:  
+        if debug_mode:
             print(f"[INFO] {len(results)} total AprilTags detected")
             print(f"[INFO] Looping over {len(results)} apriltags and getting data")
 
-        # loop over the AprilTag detection results
-        if len(results) == 0:
-            cv2.imshow("Image", inputImage)
+        nt.putNumber("x", -1)
+        nt.putNumber("y", -1)
 
+        # loop over the AprilTag detection results
         for r in results:
             # extract the bounding box (x, y)-coordinates for the AprilTag
             # and convert each of the (x, y)-coordinate pairs to integers
@@ -95,6 +107,9 @@ while capture.isOpened():
 
                 x_centered = cX - frame_width / 2
                 y_centered = -1 * (cY - frame_height / 2)
+
+                nt.putNumber("x", x_centered)
+                nt.putNumber("y", y_centered)
 
                 cv2.putText(inputImage, f"Center X coord: {x_centered}", (ptB[0] + 10, ptB[1] - 20),
                             cv2.FONT_HERSHEY_SIMPLEX, .5, (0, 255, 0), 2)
@@ -133,17 +148,12 @@ while capture.isOpened():
             cv2.putText(inputImage, f"FPS: {1 / (end_time - start_time)}", (0, 30),
                         cv2.FONT_HERSHEY_SIMPLEX, .5, (0, 255, 0), 2)
 
-        cv2.imshow("Image", inputImage)
         # Press Q on keyboard to  exit
         if cv2.waitKey(25) & 0xFF == ord('q'):
             break
+        output.putFrame(inputImage)
 
 
     # Break the loop
     else:
         break
-
-
-# When everything done, release the video capture object
-# save the output video to disk
-capture.release()
